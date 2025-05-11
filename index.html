@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Movie Explorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-6">
+  <h1 class="text-3xl font-bold mb-4">🎬 Movie Explorer</h1>
+
+  <div class="flex flex-col md:flex-row gap-4 mb-6">
+    <input type="text" id="searchInput" placeholder="Search movies..." class="p-2 rounded text-black w-full md:w-1/2">
+    <select id="genreFilter" class="p-2 rounded text-black w-full md:w-1/4">
+      <option value="All">All Genres</option>
+      <option value="Action">Action</option>
+      <option value="Comedy">Comedy</option>
+      <option value="Drama">Drama</option>
+    </select>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="movieList"></div>
+
+  <h2 class="text-2xl font-semibold mt-10 mb-4">📌 Watch Later</h2>
+  <ul id="watchLaterList" class="list-disc pl-6"></ul>
+
+  <script>
+    const movies = [
+      { id: 1, title: "Edge of Tomorrow", genre: "Action", rating: "8.0" },
+      { id: 2, title: "The Grand Budapest Hotel", genre: "Comedy", rating: "7.8" },
+      { id: 3, title: "The Pursuit of Happyness", genre: "Drama", rating: "8.0" },
+      { id: 4, title: "Inception", genre: "Action", rating: "8.8" },
+      { id: 5, title: "Deadpool", genre: "Comedy", rating: "8.0" }
+    ];
+
+    const movieList = document.getElementById('movieList');
+    const searchInput = document.getElementById('searchInput');
+    const genreFilter = document.getElementById('genreFilter');
+    const watchLaterList = document.getElementById('watchLaterList');
+
+    let watchLater = JSON.parse(localStorage.getItem('watchLater')) || [];
+
+    function displayMovies() {
+      const search = searchInput.value.toLowerCase();
+      const genre = genreFilter.value;
+      movieList.innerHTML = "";
+
+      movies
+        .filter(movie => 
+          (genre === "All" || movie.genre === genre) && 
+          movie.title.toLowerCase().includes(search)
+        )
+        .forEach(movie => {
+          const card = document.createElement('div');
+          card.className = "bg-gray-800 p-4 rounded shadow";
+          card.innerHTML = `
+            <h3 class="text-xl font-semibold">${movie.title}</h3>
+            <p>🎭 Genre: ${movie.genre}</p>
+            <p>⭐ Rating: ${movie.rating}</p>
+            <button onclick="addToWatchLater('${movie.title}')" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">+ Watch Later</button>
+          `;
+          movieList.appendChild(card);
+        });
+    }
+
+    function addToWatchLater(title) {
+      if (!watchLater.includes(title)) {
+        watchLater.push(title);
+        localStorage.setItem('watchLater', JSON.stringify(watchLater));
+        renderWatchLater();
+      }
+    }
+
+    function renderWatchLater() {
+      watchLaterList.innerHTML = "";
+      watchLater.forEach(title => {
+        const li = document.createElement('li');
+        li.textContent = title;
+        watchLaterList.appendChild(li);
+      });
+    }
+
+    searchInput.addEventListener('input', displayMovies);
+    genreFilter.addEventListener('change', displayMovies);
+
+    displayMovies();
+    renderWatchLater();
+  </script>
+</body>
+</html>
